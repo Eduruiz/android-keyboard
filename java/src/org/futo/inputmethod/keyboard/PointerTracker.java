@@ -1448,13 +1448,13 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     }
 
     private static int anchorGestureAction(final int destCode) {
-        return switch (destCode) {
-            case 'a', 'A' -> Constants.CODE_ANCHOR_SELECT_ALL;
-            case 'x', 'X' -> Constants.CODE_ANCHOR_CUT;
-            case 'c', 'C' -> Constants.CODE_ANCHOR_COPY;
-            case 'v', 'V' -> Constants.CODE_ANCHOR_PASTE;
-            case 'z', 'Z' -> Constants.CODE_ANCHOR_UNDO;
-            default        -> Constants.NOT_A_CODE;
-        };
+        switch (destCode) {
+            case 'a': case 'A': return Constants.CODE_ANCHOR_SELECT_ALL;
+            case 'x': case 'X': return Constants.CODE_ANCHOR_CUT;
+            case 'c': case 'C': return Constants.CODE_ANCHOR_COPY;
+            case 'v': case 'V': return Constants.CODE_ANCHOR_PASTE;
+            case 'z': case 'Z': return Constants.CODE_ANCHOR_UNDO;
+            default:             return Constants.NOT_A_CODE;
+        }
     }
 }
