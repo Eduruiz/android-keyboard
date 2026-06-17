@@ -31,8 +31,7 @@ jobs:
         with:
           name: FutoKeyboard-debug
           path: |
-            app/build/outputs/apk/debug/*.apk
-            build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/**/debug/*.apk
           if-no-files-found: warn
 
       - name: Archive reports on failure
