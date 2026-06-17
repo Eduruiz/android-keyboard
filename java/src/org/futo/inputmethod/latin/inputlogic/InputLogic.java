@@ -34,6 +34,7 @@ import org.futo.inputmethod.event.Event;
 import org.futo.inputmethod.event.InputTransaction;
 import org.futo.inputmethod.keyboard.Keyboard;
 import org.futo.inputmethod.keyboard.KeyboardSwitcher;
+import org.futo.inputmethod.keyboard.PointerTracker;
 import org.futo.inputmethod.latin.BinaryDictionary;
 import org.futo.inputmethod.latin.DictionaryFacilitator;
 import org.futo.inputmethod.latin.LastComposedWord;
@@ -891,6 +892,22 @@ public final class InputLogic {
             commitTyped(inputTransaction.mSettingsValues, "");
             inputTransaction.setRequiresUpdateSuggestions();
             return;
+        }
+
+        if (event.mKeyCode == Constants.CODE_ANCHOR_SELECT_ALL) {
+            sendDownUpKeyEvent(KeyEvent.KEYCODE_A, KeyEvent.META_CTRL_ON); return;
+        }
+        if (event.mKeyCode == Constants.CODE_ANCHOR_COPY) {
+            sendDownUpKeyEvent(KeyEvent.KEYCODE_C, KeyEvent.META_CTRL_ON); return;
+        }
+        if (event.mKeyCode == Constants.CODE_ANCHOR_CUT) {
+            sendDownUpKeyEvent(KeyEvent.KEYCODE_X, KeyEvent.META_CTRL_ON); return;
+        }
+        if (event.mKeyCode == Constants.CODE_ANCHOR_PASTE) {
+            sendDownUpKeyEvent(KeyEvent.KEYCODE_V, KeyEvent.META_CTRL_ON); return;
+        }
+        if (event.mKeyCode == Constants.CODE_ANCHOR_UNDO) {
+            sendDownUpKeyEvent(KeyEvent.KEYCODE_Z, KeyEvent.META_CTRL_ON); return;
         }
 
         if(event.mKeyCode <= Constants.CODE_ACTION_MAX && event.mKeyCode >= Constants.CODE_ACTION_0) {
@@ -2621,6 +2638,10 @@ public final class InputLogic {
             final boolean distinct) {
         final String batchInputText = suggestedWords.isEmpty() ? null : suggestedWords.getWord(0);
         if (TextUtils.isEmpty(batchInputText)) {
+            // Punctuation gestures: glide from M or N with no word result → insert ? or !
+            final int origin = PointerTracker.sGestureOriginCode;
+            if (origin == 'm' || origin == 'M') { mConnection.commitText("?", 1); }
+            else if (origin == 'n' || origin == 'N') { mConnection.commitText("!", 1); }
             return;
         }
 

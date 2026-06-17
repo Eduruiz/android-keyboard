@@ -129,6 +129,11 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
     private static boolean sInGesture = false;
     private static TypingTimeRecorder sTypingTimeRecorder;
 
+    // Anchor gesture state (⌨ key drag → edit action)
+    private boolean mIsAnchorGesture = false;
+    // Origin key code when a glide gesture starts; used for M→?  N→! punctuation gestures
+    public static int sGestureOriginCode = 0;
+
     // The position and time at which first down event occurred.
     private long mDownTime;
     @Nonnull
@@ -599,6 +604,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             return;
         }
         sInGesture = false;
+        sGestureOriginCode = 0;
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format("[%d] onCancelBatchInput", mPointerId));
         }
@@ -765,6 +771,11 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             mIsFlickingKey = !mIsSlidingCursor && key.getHasFlick();
             mFlickDirection = key.flickDirection(0, 0);
             mCurrentKey = key;
+
+            if (key.getCode() == Constants.CODE_KEYBOARD_ANCHOR) {
+                mIsAnchorGesture = true;
+                sTimerProxy.cancelKeyTimersOf(this);
+            }
         }
     }
 
@@ -803,6 +814,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         if (!sInGesture && key != null && Character.isLetter(key.getCode())
                 && mBatchInputArbiter.mayStartBatchInput(this)) {
             sInGesture = true;
+            sGestureOriginCode = key.getCode();
         }
         if (sInGesture) {
             if (key != null) {
@@ -1164,8 +1176,20 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
             if (mBatchInputArbiter.mayEndBatchInput(
                     eventTime, getActivePointerTrackerCount(), this)) {
                 sInGesture = false;
+                sGestureOriginCode = 0;
             }
             showGestureTrail();
+            return;
+        }
+
+        if (mIsAnchorGesture) {
+            mIsAnchorGesture = false;
+            final Key destKey = mKeyDetector.detectHitKey(x, y);
+            final int destCode = destKey != null ? destKey.getCode() : Constants.NOT_A_CODE;
+            final int action = anchorGestureAction(destCode);
+            if (action != Constants.NOT_A_CODE) {
+                sListener.onCodeInput(action, x, y, false);
+            }
             return;
         }
 
@@ -1284,6 +1308,7 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         setReleasedKeyGraphics(mCurrentKey, true /* withAnimation */);
         resetKeySelectionByDraggingFinger();
         dismissMoreKeysPanel();
+        mIsAnchorGesture = false;
     }
 
     private boolean isMajorEnoughMoveToBeOnNewKey(final int x, final int y, final long eventTime,
@@ -1420,5 +1445,16 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         final String code = (key == null ? "none" : Constants.printableCode(key.getCode()));
         Log.d(TAG, String.format("[%d]%s%s %4d %4d %5d %s", mPointerId,
                 (mIsTrackingForActionDisabled ? "-" : " "), title, x, y, eventTime, code));
+    }
+
+    private static int anchorGestureAction(final int destCode) {
+        return switch (destCode) {
+            case 'a', 'A' -> Constants.CODE_ANCHOR_SELECT_ALL;
+            case 'x', 'X' -> Constants.CODE_ANCHOR_CUT;
+            case 'c', 'C' -> Constants.CODE_ANCHOR_COPY;
+            case 'v', 'V' -> Constants.CODE_ANCHOR_PASTE;
+            case 'z', 'Z' -> Constants.CODE_ANCHOR_UNDO;
+            default        -> Constants.NOT_A_CODE;
+        };
     }
 }

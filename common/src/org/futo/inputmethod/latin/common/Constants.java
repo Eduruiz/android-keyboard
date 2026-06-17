@@ -263,6 +263,14 @@ public final class Constants {
     public static final int CODE_ALT_ACTION_0 = -2050;
     public static final int CODE_ALT_ACTION_MAX = CODE_ALT_ACTION_0 + 100;
 
+    // Swype-style anchor gesture key and its actions
+    public static final int CODE_KEYBOARD_ANCHOR    = -2200;
+    public static final int CODE_ANCHOR_SELECT_ALL  = -2201;
+    public static final int CODE_ANCHOR_COPY        = -2202;
+    public static final int CODE_ANCHOR_CUT         = -2203;
+    public static final int CODE_ANCHOR_PASTE       = -2204;
+    public static final int CODE_ANCHOR_UNDO        = -2205;
+
     public static boolean isLetterCode(final int code) {
         return code >= CODE_SPACE;
     }

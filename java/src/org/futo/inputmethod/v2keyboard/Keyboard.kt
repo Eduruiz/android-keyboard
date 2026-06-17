@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.serializer
 import org.futo.inputmethod.keyboard.internal.KeyboardLayoutKind
 import org.futo.inputmethod.keyboard.internal.KeyboardParams
+import org.futo.inputmethod.latin.common.Constants
 import org.futo.inputmethod.latin.settings.Settings
 
 object RowKeyListSerializer : SpacedListSerializer<Key>(KeyPathSerializer)
@@ -132,6 +133,7 @@ val DefaultNumberRowClassic = Row(
 
 val DefaultBottomRow = Row(
     bottom = listOf(
+        BaseKey("⌨|!code/key_keyboard_anchor", attributes = FunctionalAttributes),
         TemplateSymbolsKey,
         ContextualKey(fallbackKey = BaseKey(",")),
         TemplateActionKey,
