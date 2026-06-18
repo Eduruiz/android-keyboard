@@ -9,8 +9,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Init submodules (skip HuggingFace rate-limited model)
+        run: |
+          git submodule update --init --depth=1 java/assets/layouts
+          git submodule update --init --depth=1 java/assets/themes
+          git submodule update --init --depth=1 java/res-large
+          git submodule update --init --depth=1 libs
+          git submodule update --init --depth=1 translations
+          git submodule update --init --depth=1 voiceinput-shared/src/main/ml
+          git submodule update --init --depth=1 java/assets/futo-swipe || echo "futo-swipe unavailable, skipping"
 
       - name: Set up JDK
         uses: actions/setup-java@v4
